@@ -1,0 +1,14 @@
+data_dir = "{{ vector_data_dir }}"
+
+[sources.logs]
+type = "file"
+include = ["/var/log/**/*.log"]
+read_from = "beginning"
+
+[sinks.clickhouse]
+type = "clickhouse"
+inputs = ["logs"]
+endpoint = "http://{{ clickhouse_host | default('localhost') }}:8123"
+database = "{{ clickhouse_database | default('logs') }}"
+table = "{{ clickhouse_table | default('log_table') }}"
+compression = "gzip"
