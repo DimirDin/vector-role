@@ -1,10 +1,40 @@
 ---
-- name: Install Vector
+- name: Create Vector group
+  ansible.builtin.group:
+    name: "{{ vector_group }}"
+    system: true
+
+- name: Create Vector user
+  ansible.builtin.user:
+    name: "{{ vector_user }}"
+    group: "{{ vector_group }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Install Vector (RedHat)
   ansible.builtin.yum:
     name: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-1.x86_64.rpm"
     state: present
     disable_gpg_check: true
   when: ansible_os_family == "RedHat"
+
+- name: Set Vector architecture
+  ansible.builtin.set_fact:
+    vector_arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+
+- name: Download Vector deb package
+  ansible.builtin.get_url:
+    url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_{{ vector_arch }}.deb"
+    dest: /tmp/vector.deb
+    mode: '0644'
+  when: ansible_os_family == "Debian"
+
+- name: Install Vector (Debian)
+  ansible.builtin.apt:
+    deb: /tmp/vector.deb
+    state: present
+  when: ansible_os_family == "Debian"
 
 - name: Create Vector config directory
   ansible.builtin.file:

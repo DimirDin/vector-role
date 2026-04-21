@@ -1,0 +1,11 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install Python (RedHat)
+      ansible.builtin.raw: |
+        test -e /usr/bin/python3 || yum install -y python3
+      when: ansible_os_family == "RedHat" or ansible_distribution == "OracleLinux"
+      changed_when: false
