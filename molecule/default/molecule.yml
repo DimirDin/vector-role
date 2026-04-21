@@ -1,0 +1,35 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    pre_build_image: true
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    capabilities:
+      - SYS_ADMIN
+    user: root
+    cgroupns_mode: host
+    command: /lib/systemd/systemd
+    environment:
+      container: docker
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      remote_tmp: /tmp
+      local_tmp: /tmp
+      host_key_checking: false
+      retry_files_enabled: false
+  inventory:
+    hosts:
+      all:
+        vars:
+          ansible_user: root
+          ansible_python_interpreter: /usr/bin/python3
+verifier:
+  name: ansible
